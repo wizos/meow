@@ -107,6 +107,16 @@ async fn start_engine_async(
     let _ = rustls::crypto::ring::default_provider().install_default();
 
     let config_str = if let Some(dir) = HOME_DIR.lock().as_ref() {
+        // Set XDG_CONFIG_HOME so mihomo-config finds GeoIP databases.
+        // mihomo-config looks for $XDG_CONFIG_HOME/mihomo/Country.mmdb
+        // Our dir is .../no_backup/mihomo, so set XDG_CONFIG_HOME to parent (.../no_backup)
+        if let Some(parent) = std::path::Path::new(dir).parent() {
+            std::env::set_var("XDG_CONFIG_HOME", parent);
+            logging::bridge_log(&format!(
+                "start_engine_async: set XDG_CONFIG_HOME={}",
+                parent.display()
+            ));
+        }
         let path = format!("{}/config.yaml", dir);
         logging::bridge_log(&format!("start_engine_async: loading config from {}", path));
         match std::fs::read_to_string(&path) {
