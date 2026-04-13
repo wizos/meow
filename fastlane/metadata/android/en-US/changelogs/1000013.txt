@@ -1,0 +1,2 @@
+- Fix GeoIP database loading issue that prevented VPN connection
+- Improved stability and reliability
